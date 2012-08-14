@@ -957,6 +957,25 @@ class Query
 	constructor: (query={}) ->
 		# Apply
 		@query = query
+		
+	resolveDotNotation: (currentModel, parts) ->
+		part = parts.shift()
+		value = currentModel.get(part)
+		valueExists = typeof value isnt 'undefined'
+		
+		if not valueExists
+			return value
+			
+		if 0 == parts.length
+		 return value
+		
+		isBackboneCollection = typeof value.models isnt 'undefined'
+		if isBackboneCollection
+			values = (@resolveDotNotation model, parts.slice() for model in value.models)
+			
+			return values
+
+		return @resolveDotNotation value, parts
 
 	test: (model) ->
 		# Match
@@ -968,11 +987,21 @@ class Query
 		for own selectorName, selectorValue of @query
 			match = false
 			empty = false
-			modelValue = model.get(selectorName)
+			
+			# Special case for dot-notation selectors (i.e., from backbone relational/
+      # nested)
+			
+			if -1 != selectorName.indexOf '.'
+				modelValue = @resolveDotNotation model, selectorName.split '.'
+			else
+				modelValue = model.get(selectorName)
+				
+			console.log modelValue
+				
 			modelId = model.get('id')
 			modelValueExists = typeof modelValue isnt 'undefined'
 			modelValue = false  unless modelValueExists
-
+			
 			# The $or operator lets you use a boolean or expression to do queries. You give $or a list of expressions, any of which can satisfy the query.
 			# The $nor operator is the opposite of $or (pass if they all don't match the query)
 			if selectorName in ['$or','$nor']

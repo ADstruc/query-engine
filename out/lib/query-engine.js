@@ -834,6 +834,34 @@
       this.query = query;
     }
 
+    Query.prototype.resolveDotNotation = function(currentModel, parts) {
+      var isBackboneCollection, model, part, value, valueExists, values;
+      part = parts.shift();
+      value = currentModel.get(part);
+      valueExists = typeof value !== 'undefined';
+      if (!valueExists) {
+        return value;
+      }
+      if (0 === parts.length) {
+        return value;
+      }
+      isBackboneCollection = typeof value.models !== 'undefined';
+      if (isBackboneCollection) {
+        values = (function() {
+          var _i, _len, _ref, _results;
+          _ref = value.models;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            model = _ref[_i];
+            _results.push(this.resolveDotNotation(model, parts.slice()));
+          }
+          return _results;
+        }).call(this);
+        return values;
+      }
+      return this.resolveDotNotation(value, parts);
+    };
+
     Query.prototype.test = function(model) {
       var $beginsWith, $beginsWithValue, $endWithValue, $endsWith, $mod, $size, empty, match, matchAll, matchAny, modelId, modelValue, modelValueExists, query, queryGroup, selectorName, selectorValue, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref;
       matchAll = true;
@@ -845,7 +873,12 @@
         selectorValue = _ref[selectorName];
         match = false;
         empty = false;
-        modelValue = model.get(selectorName);
+        if (-1 !== selectorName.indexOf('.')) {
+          modelValue = this.resolveDotNotation(model, selectorName.split('.'));
+        } else {
+          modelValue = model.get(selectorName);
+        }
+        console.log(modelValue);
         modelId = model.get('id');
         modelValueExists = typeof modelValue !== 'undefined';
         if (!modelValueExists) {
