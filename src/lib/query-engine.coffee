@@ -996,8 +996,6 @@ class Query
 			else
 				modelValue = model.get(selectorName)
 				
-			console.log modelValue
-				
 			modelId = model.get('id')
 			modelValueExists = typeof modelValue isnt 'undefined'
 			modelValue = false  unless modelValueExists

@@ -878,7 +878,6 @@
         } else {
           modelValue = model.get(selectorName);
         }
-        console.log(modelValue);
         modelId = model.get('id');
         modelValueExists = typeof modelValue !== 'undefined';
         if (!modelValueExists) {
