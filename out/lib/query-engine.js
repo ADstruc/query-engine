@@ -836,36 +836,8 @@
       this.query = query;
     }
 
-    Query.prototype.resolveDotNotation = function(currentModel, parts) {
-      var isBackboneCollection, model, part, value, valueExists, values;
-      part = parts.shift();
-      value = currentModel.get(part);
-      valueExists = typeof value !== 'undefined';
-      if (!valueExists) {
-        return value;
-      }
-      if (0 === parts.length) {
-        return value;
-      }
-      isBackboneCollection = typeof value.models !== 'undefined';
-      if (isBackboneCollection) {
-        values = (function() {
-          var _i, _len, _ref, _results;
-          _ref = value.models;
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            model = _ref[_i];
-            _results.push(this.resolveDotNotation(model, parts.slice()));
-          }
-          return _results;
-        }).call(this);
-        return values;
-      }
-      return this.resolveDotNotation(value, parts);
-    };
-
     Query.prototype.test = function(model) {
-      var $beginsWith, $beginsWithValue, $endWithValue, $endsWith, $mod, $size, empty, match, matchAll, matchAny, modelId, modelValue, modelValueExists, query, queryGroup, selectorName, selectorValue, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref;
+      var $beginsWith, $beginsWithValue, $endWithValue, $endsWith, $mod, $size, empty, isBackboneCollection, match, matchAll, matchAny, modelId, modelValue, modelValueExists, part, parts, query, queryGroup, selectorName, selectorValue, subModel, valueExists, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _m, _n, _o, _ref, _ref1;
       matchAll = true;
       matchAny = false;
       empty = true;
@@ -876,7 +848,21 @@
         match = false;
         empty = false;
         if (-1 !== selectorName.indexOf('.')) {
-          modelValue = this.resolveDotNotation(model, selectorName.split('.'));
+          parts = selectorName.split('.');
+          modelValue = model;
+          for (_i = _j = 0, _len = parts.length; _j < _len; _i = ++_j) {
+            part = parts[_i];
+            modelValue = modelValue.get(part);
+            selectorName = parts[_i + 1];
+            valueExists = typeof value !== 'undefined';
+            if (!valueExists) {
+              break;
+            }
+            isBackboneCollection = typeof value.models !== 'undefined';
+            if (isBackboneCollection) {
+              break;
+            }
+          }
         } else {
           modelValue = model.get(selectorName);
         }
@@ -885,13 +871,26 @@
         if (!modelValueExists) {
           modelValue = false;
         }
-        if (selectorName === '$or' || selectorName === '$nor') {
+        isBackboneCollection = typeof modelValue.models !== 'undefined';
+        if (isBackboneCollection) {
+          query = {};
+          query[selectorName] = selectorValue;
+          query = new Query(query);
+          _ref1 = modelValue.models;
+          for (_k = 0, _len1 = _ref1.length; _k < _len1; _k++) {
+            subModel = _ref1[_k];
+            if (query.test(subModel)) {
+              match = true;
+              break;
+            }
+          }
+        } else if (selectorName === '$or' || selectorName === '$nor') {
           queryGroup = util.toArrayGroup(selectorValue);
           if (!queryGroup.length) {
             throw new Error("Query called with an empty " + selectorName + " statement");
           }
-          for (_i = 0, _len = queryGroup.length; _i < _len; _i++) {
-            query = queryGroup[_i];
+          for (_l = 0, _len2 = queryGroup.length; _l < _len2; _l++) {
+            query = queryGroup[_l];
             query = new Query(query);
             if (query.test(model)) {
               match = true;
@@ -906,8 +905,8 @@
           if (!queryGroup.length) {
             throw new Error("Query called with an empty " + selectorName + " statement");
           }
-          for (_j = 0, _len1 = queryGroup.length; _j < _len1; _j++) {
-            query = queryGroup[_j];
+          for (_m = 0, _len3 = queryGroup.length; _m < _len3; _m++) {
+            query = queryGroup[_m];
             query = new Query(query);
             match = query.test(model);
             if (!match) {
@@ -943,8 +942,8 @@
             if (!util.isArray($beginsWith)) {
               $beginsWith = [$beginsWith];
             }
-            for (_k = 0, _len2 = $beginsWith.length; _k < _len2; _k++) {
-              $beginsWithValue = $beginsWith[_k];
+            for (_n = 0, _len4 = $beginsWith.length; _n < _len4; _n++) {
+              $beginsWithValue = $beginsWith[_n];
               if (modelValue.substr(0, $beginsWithValue.length) === $beginsWithValue) {
                 match = true;
                 break;
@@ -956,8 +955,8 @@
             if (!util.isArray($endsWith)) {
               $endsWith = [$endsWith];
             }
-            for (_l = 0, _len3 = $endsWith.length; _l < _len3; _l++) {
-              $endWithValue = $endsWith[_l];
+            for (_o = 0, _len5 = $endsWith.length; _o < _len5; _o++) {
+              $endWithValue = $endsWith[_o];
               if (modelValue.substr($endWithValue.length * -1) === $endWithValue) {
                 match = true;
                 break;

@@ -237,6 +237,16 @@ generateTestSuite = (describe, it, name,docs) ->
 			expected = queryEngine.createCollection 'index': docs.get('index')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
+# @todo finish these and see if things are actually broken
+#		it '$gt-and-$lt', ->
+#			actual = docs.findAll position: $gt: 1, $lt: 3
+#			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
+#			# assert.deepEqual actual.toJSON(), expected.toJSON()
+#			
+#		it '$gte-and-$lte-false', ->
+#			actual = docs.findAll position: $gte: 5, $lte: 10
+#			assert.deepEqual actual.toJSON(), '{}'
+
 		it '$lt-date', ->
 			actual = docs.findAll date: $lt: today
 			expected = queryEngine.createCollection 'jquery': docs.get('jquery')

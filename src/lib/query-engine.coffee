@@ -959,25 +959,6 @@ class Query
 	constructor: (query={}) ->
 		# Apply
 		@query = query
-		
-	resolveDotNotation: (currentModel, parts) ->
-		part = parts.shift()
-		value = currentModel.get(part)
-		valueExists = typeof value isnt 'undefined'
-		
-		if not valueExists
-			return value
-			
-		if 0 == parts.length
-		 return value
-		
-		isBackboneCollection = typeof value.models isnt 'undefined'
-		if isBackboneCollection
-			values = (@resolveDotNotation model, parts.slice() for model in value.models)
-			
-			return values
-
-		return @resolveDotNotation value, parts
 
 	test: (model) ->
 		# Match
@@ -987,14 +968,29 @@ class Query
 
 		# Selectors
 		for own selectorName, selectorValue of @query
-			match = false
-			empty = false
+			match				= false
+			empty				= false
 			
 			# Special case for dot-notation selectors (i.e., from backbone relational/
       # nested)
 			
 			if -1 != selectorName.indexOf '.'
-				modelValue = @resolveDotNotation model, selectorName.split '.'
+				parts = selectorName.split '.'
+				modelValue = model
+				for part, _i in parts
+					modelValue = modelValue.get(part)
+					selectorName = parts[_i + 1]
+					
+					valueExists = typeof value isnt 'undefined'
+					if not valueExists
+						break
+		
+					# If we run into a collection, we can't resolve any further at this level 
+					# and need to rely on the @test implementation to handle the query
+					isBackboneCollection = typeof value.models isnt 'undefined'
+					if isBackboneCollection
+						break
+					
 			else
 				modelValue = model.get(selectorName)
 				
@@ -1002,9 +998,18 @@ class Query
 			modelValueExists = typeof modelValue isnt 'undefined'
 			modelValue = false  unless modelValueExists
 			
+			isBackboneCollection = typeof modelValue.models isnt 'undefined'
+			if isBackboneCollection
+				query = {}
+				query[selectorName] = selectorValue	
+				query = new Query(query)
+				for subModel in modelValue.models
+					if query.test(subModel)
+						match = true
+						break
 			# The $or operator lets you use a boolean or expression to do queries. You give $or a list of expressions, any of which can satisfy the query.
 			# The $nor operator is the opposite of $or (pass if they all don't match the query)
-			if selectorName in ['$or','$nor']
+			else if selectorName in ['$or','$nor']
 				queryGroup = util.toArrayGroup(selectorValue)
 				unless queryGroup.length then throw new Error("Query called with an empty #{selectorName} statement")
 				# Match if at least one item passes
