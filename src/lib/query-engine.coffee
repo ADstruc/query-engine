@@ -959,6 +959,29 @@ class Query
 	constructor: (query={}) ->
 		# Apply
 		@query = query
+		
+	resolveDotNotation: (selectors, value) ->
+		if typeof value isnt 'object' or selectors.length is 0
+			return value
+		
+		isBackboneCollection = typeof value.models is 'object'
+		
+		if isBackboneCollection
+			return value
+		
+		isBackboneModel = typeof value.get is 'function'
+		
+		if not isBackboneModel
+			return value
+			
+		selector = do selectors.shift
+		
+		if selector is 'id'
+			value = value.id
+		else
+			value = value.get selector
+		
+		return @resolveDotNotation selectors, value
 
 	test: (model) ->
 		# Match
@@ -975,25 +998,14 @@ class Query
       # nested)
 			
 			if -1 != selectorName.indexOf '.'
-				parts = selectorName.split '.'
-				modelValue = model
-				for part, _i in parts
-					modelValue = modelValue.get(part)
-					selectorName = parts[_i + 1]
-					
-					valueExists = typeof value isnt 'undefined'
-					if not valueExists
-						break
-		
-					# If we run into a collection, we can't resolve any further at this level 
-					# and need to rely on the @test implementation to handle the query
-					isBackboneCollection = typeof value.models isnt 'undefined'
-					if isBackboneCollection
-						break
-					
+				selectors = selectorName.split '.'
+				
+				modelValue = @resolveDotNotation selectors, model
+			else if selectorName is 'id'
+				modelValue = model.id
 			else
 				modelValue = model.get(selectorName)
-				
+			
 			modelId = model.get('id')
 			modelValueExists = typeof modelValue isnt 'undefined'
 			modelValue = false  unless modelValueExists
@@ -1001,6 +1013,8 @@ class Query
 			isBackboneCollection = typeof modelValue.models isnt 'undefined'
 			if isBackboneCollection
 				query = {}
+				selectorName = selectorName.split('.').pop()
+				
 				query[selectorName] = selectorValue	
 				query = new Query(query)
 				for subModel in modelValue.models

@@ -836,8 +836,30 @@
       this.query = query;
     }
 
+    Query.prototype.resolveDotNotation = function(selectors, value) {
+      var isBackboneCollection, isBackboneModel, selector;
+      if (typeof value !== 'object' || selectors.length === 0) {
+        return value;
+      }
+      isBackboneCollection = typeof value.models === 'object';
+      if (isBackboneCollection) {
+        return value;
+      }
+      isBackboneModel = typeof value.get === 'function';
+      if (!isBackboneModel) {
+        return value;
+      }
+      selector = selectors.shift();
+      if (selector === 'id') {
+        value = value.id;
+      } else {
+        value = value.get(selector);
+      }
+      return this.resolveDotNotation(selectors, value);
+    };
+
     Query.prototype.test = function(model) {
-      var $beginsWith, $beginsWithValue, $endWithValue, $endsWith, $mod, $size, empty, isBackboneCollection, match, matchAll, matchAny, modelId, modelValue, modelValueExists, part, parts, query, queryGroup, selectorName, selectorValue, subModel, valueExists, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _m, _n, _o, _ref, _ref1;
+      var $beginsWith, $beginsWithValue, $endWithValue, $endsWith, $mod, $size, empty, isBackboneCollection, match, matchAll, matchAny, modelId, modelValue, modelValueExists, query, queryGroup, selectorName, selectorValue, selectors, subModel, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref, _ref1;
       matchAll = true;
       matchAny = false;
       empty = true;
@@ -848,21 +870,10 @@
         match = false;
         empty = false;
         if (-1 !== selectorName.indexOf('.')) {
-          parts = selectorName.split('.');
-          modelValue = model;
-          for (_i = _j = 0, _len = parts.length; _j < _len; _i = ++_j) {
-            part = parts[_i];
-            modelValue = modelValue.get(part);
-            selectorName = parts[_i + 1];
-            valueExists = typeof value !== 'undefined';
-            if (!valueExists) {
-              break;
-            }
-            isBackboneCollection = typeof value.models !== 'undefined';
-            if (isBackboneCollection) {
-              break;
-            }
-          }
+          selectors = selectorName.split('.');
+          modelValue = this.resolveDotNotation(selectors, model);
+        } else if (selectorName === 'id') {
+          modelValue = model.id;
         } else {
           modelValue = model.get(selectorName);
         }
@@ -874,11 +885,12 @@
         isBackboneCollection = typeof modelValue.models !== 'undefined';
         if (isBackboneCollection) {
           query = {};
+          selectorName = selectorName.split('.').pop();
           query[selectorName] = selectorValue;
           query = new Query(query);
           _ref1 = modelValue.models;
-          for (_k = 0, _len1 = _ref1.length; _k < _len1; _k++) {
-            subModel = _ref1[_k];
+          for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+            subModel = _ref1[_i];
             if (query.test(subModel)) {
               match = true;
               break;
@@ -889,8 +901,8 @@
           if (!queryGroup.length) {
             throw new Error("Query called with an empty " + selectorName + " statement");
           }
-          for (_l = 0, _len2 = queryGroup.length; _l < _len2; _l++) {
-            query = queryGroup[_l];
+          for (_j = 0, _len1 = queryGroup.length; _j < _len1; _j++) {
+            query = queryGroup[_j];
             query = new Query(query);
             if (query.test(model)) {
               match = true;
@@ -905,8 +917,8 @@
           if (!queryGroup.length) {
             throw new Error("Query called with an empty " + selectorName + " statement");
           }
-          for (_m = 0, _len3 = queryGroup.length; _m < _len3; _m++) {
-            query = queryGroup[_m];
+          for (_k = 0, _len2 = queryGroup.length; _k < _len2; _k++) {
+            query = queryGroup[_k];
             query = new Query(query);
             match = query.test(model);
             if (!match) {
@@ -942,8 +954,8 @@
             if (!util.isArray($beginsWith)) {
               $beginsWith = [$beginsWith];
             }
-            for (_n = 0, _len4 = $beginsWith.length; _n < _len4; _n++) {
-              $beginsWithValue = $beginsWith[_n];
+            for (_l = 0, _len3 = $beginsWith.length; _l < _len3; _l++) {
+              $beginsWithValue = $beginsWith[_l];
               if (modelValue.substr(0, $beginsWithValue.length) === $beginsWithValue) {
                 match = true;
                 break;
@@ -955,8 +967,8 @@
             if (!util.isArray($endsWith)) {
               $endsWith = [$endsWith];
             }
-            for (_o = 0, _len5 = $endsWith.length; _o < _len5; _o++) {
-              $endWithValue = $endsWith[_o];
+            for (_m = 0, _len4 = $endsWith.length; _m < _len4; _m++) {
+              $endWithValue = $endsWith[_m];
               if (modelValue.substr($endWithValue.length * -1) === $endWithValue) {
                 match = true;
                 break;
