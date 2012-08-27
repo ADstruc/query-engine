@@ -984,6 +984,9 @@ class Query
 		return @resolveDotNotation selectors, value
 
 	test: (model) ->
+		if 0 == Object.getOwnPropertyNames(@query).length
+			return true
+	
 		# Match
 		matchAll = true
 		matchAny = false

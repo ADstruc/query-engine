@@ -860,6 +860,9 @@
 
     Query.prototype.test = function(model) {
       var $beginsWith, $beginsWithValue, $endWithValue, $endsWith, $mod, $size, empty, isBackboneCollection, match, matchAll, matchAny, modelId, modelValue, modelValueExists, query, queryGroup, selectorName, selectorValue, selectors, subModel, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref, _ref1;
+      if (0 === Object.getOwnPropertyNames(this.query).length) {
+        return true;
+      }
       matchAll = true;
       matchAny = false;
       empty = true;
