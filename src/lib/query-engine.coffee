@@ -602,6 +602,9 @@ class QueryCollection extends Backbone.Collection
 			pass = me.test(model)
 			if pass
 				models.push(model)
+				model.trigger('query-engine:in-query', me)
+			else
+			  model.trigger('query-engine:not-in-query', me)
 
 		# Page our models
 		start = paging.offset or 0

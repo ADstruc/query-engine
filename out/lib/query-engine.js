@@ -505,7 +505,10 @@
         var pass;
         pass = me.test(model);
         if (pass) {
-          return models.push(model);
+          models.push(model);
+          return model.trigger('query-engine:in-query', me);
+        } else {
+          return model.trigger('query-engine:not-in-query', me);
         }
       });
       start = paging.offset || 0;
