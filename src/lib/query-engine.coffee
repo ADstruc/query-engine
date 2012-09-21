@@ -1016,7 +1016,7 @@ class Query
 			modelValueExists = typeof modelValue isnt 'undefined'
 			modelValue = false  unless modelValueExists
 			
-			isBackboneCollection = typeof modelValue.models isnt 'undefined'
+			isBackboneCollection = util.isObject(modelValue) and typeof modelValue.models isnt 'undefined'
 			if isBackboneCollection
 				query = {}
 				selectorName = selectorName.split('.').pop()

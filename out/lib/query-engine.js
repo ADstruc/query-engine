@@ -888,7 +888,7 @@
         if (!modelValueExists) {
           modelValue = false;
         }
-        isBackboneCollection = typeof modelValue.models !== 'undefined';
+        isBackboneCollection = util.isObject(modelValue) && typeof modelValue.models !== 'undefined';
         if (isBackboneCollection) {
           query = {};
           selectorName = selectorName.split('.').pop();
