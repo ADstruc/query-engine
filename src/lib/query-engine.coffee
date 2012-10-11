@@ -987,6 +987,9 @@ class Query
 		return @resolveDotNotation selectors, value
 
 	test: (model) ->
+		if not (model instanceof Backbone.Model)
+			return false
+		
 		if 0 == Object.getOwnPropertyNames(@query).length
 			return true
 	
@@ -1012,7 +1015,6 @@ class Query
 			else
 				modelValue = model.get(selectorName)
 			
-			modelId = model.get('id')
 			modelValueExists = typeof modelValue isnt 'undefined'
 			modelValue = false  unless modelValueExists
 			

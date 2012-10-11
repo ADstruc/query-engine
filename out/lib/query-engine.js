@@ -862,7 +862,10 @@
     };
 
     Query.prototype.test = function(model) {
-      var $beginsWith, $beginsWithValue, $endWithValue, $endsWith, $mod, $size, empty, isBackboneCollection, match, matchAll, matchAny, modelId, modelValue, modelValueExists, query, queryGroup, selectorName, selectorValue, selectors, subModel, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref, _ref1;
+      var $beginsWith, $beginsWithValue, $endWithValue, $endsWith, $mod, $size, empty, isBackboneCollection, match, matchAll, matchAny, modelValue, modelValueExists, query, queryGroup, selectorName, selectorValue, selectors, subModel, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref, _ref1;
+      if (!(model instanceof Backbone.Model)) {
+        return false;
+      }
       if (0 === Object.getOwnPropertyNames(this.query).length) {
         return true;
       }
@@ -883,7 +886,6 @@
         } else {
           modelValue = model.get(selectorName);
         }
-        modelId = model.get('id');
         modelValueExists = typeof modelValue !== 'undefined';
         if (!modelValueExists) {
           modelValue = false;
