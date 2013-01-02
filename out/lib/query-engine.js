@@ -878,8 +878,8 @@
         selectorValue = _ref[selectorName];
         match = false;
         empty = false;
-        if (-1 !== selectorName.indexOf('.')) {
-          selectors = selectorName.split('.');
+        if (-1 !== selectorName.indexOf('.' || -1 !== selectorName.indexOf(':'))) {
+          selectors = selectorName.split(/(?:\.|\:)/);
           modelValue = this.resolveDotNotation(selectors, model);
         } else if (selectorName === 'id') {
           modelValue = model.id;
@@ -893,7 +893,7 @@
         isBackboneCollection = util.isObject(modelValue) && typeof modelValue.models !== 'undefined';
         if (isBackboneCollection) {
           query = {};
-          selectorName = selectorName.split('.').pop();
+          selectorName = selectorName.split(':').pop();
           query[selectorName] = selectorValue;
           query = new Query(query);
           _ref1 = modelValue.models;

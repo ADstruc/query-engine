@@ -1006,9 +1006,9 @@ class Query
 			# Special case for dot-notation selectors (i.e., from backbone relational/
       # nested)
 			
-			if -1 != selectorName.indexOf '.'
-				selectors = selectorName.split '.'
-				
+			if -1 != selectorName.indexOf '.' || -1 != selectorName.indexOf ':'
+				selectors = selectorName.split /(?:\.|\:)/
+
 				modelValue = @resolveDotNotation selectors, model
 			else if selectorName is 'id'
 				modelValue = model.id
@@ -1021,8 +1021,7 @@ class Query
 			isBackboneCollection = util.isObject(modelValue) and typeof modelValue.models isnt 'undefined'
 			if isBackboneCollection
 				query = {}
-				selectorName = selectorName.split('.').pop()
-				
+				selectorName = selectorName.split(':').pop()
 				query[selectorName] = selectorValue	
 				query = new Query(query)
 				for subModel in modelValue.models
@@ -1232,7 +1231,7 @@ class Query
 		if matchAll and !matchAny
 			matchAll = false
 
-		# Return
+# Return
 		return matchAll
 
 
