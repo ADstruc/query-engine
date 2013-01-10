@@ -1006,7 +1006,7 @@ class Query
 			# Special case for dot-notation selectors (i.e., from backbone relational/
       # nested)
 			
-			if -1 != selectorName.indexOf '.' || -1 != selectorName.indexOf ':'
+			if -1 != selectorName.indexOf('.') || -1 != selectorName.indexOf(':')
 				selectors = selectorName.split /(?:\.|\:)/
 
 				modelValue = @resolveDotNotation selectors, model

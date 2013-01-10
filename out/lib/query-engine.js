@@ -878,7 +878,7 @@
         selectorValue = _ref[selectorName];
         match = false;
         empty = false;
-        if (-1 !== selectorName.indexOf('.' || -1 !== selectorName.indexOf(':'))) {
+        if (-1 !== selectorName.indexOf('.') || -1 !== selectorName.indexOf(':')) {
           selectors = selectorName.split(/(?:\.|\:)/);
           modelValue = this.resolveDotNotation(selectors, model);
         } else if (selectorName === 'id') {
