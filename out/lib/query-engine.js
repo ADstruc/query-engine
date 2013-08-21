@@ -469,7 +469,11 @@
         comparator = util.generateComparator(comparator);
         this.models.sort(comparator);
       } else if (this.comparator) {
-        this.models.sort(this.comparator);
+            if (this.comparator.length === 1) {
+                this.models = this.sortBy(this.comparator);
+            } else {
+                this.models.sort(this.comparator);
+            }
       } else {
         throw new Error('You need a comparator to sort');
       }
@@ -483,7 +487,11 @@
         comparator = util.generateComparator(comparator);
         arr.sort(comparator);
       } else if (this.comparator) {
-        arr.sort(this.comparator);
+            if (this.comparator.length === 1) {
+                arr = _.sortBy(arr, this.comparator);
+            } else {
+                arr.sort(this.comparator);
+            }
       } else {
         throw new Error('You need a comparator to sort');
       }
