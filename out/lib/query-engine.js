@@ -512,17 +512,11 @@
       collection.each(function(model) {
         var pass;
         pass = me.test(model);
-        if(silent) {
-            if (pass) {
-              models.push(model);
-            }
+        if (pass) {
+          models.push(model);
+          return !silent ? model.trigger('query-engine:in-query', me) : null;
         } else {
-            if (pass) {
-              models.push(model);
-              return model.trigger('query-engine:in-query', me);
-            } else {
-              return model.trigger('query-engine:not-in-query', me);
-            }
+          return !silent ? model.trigger('query-engine:not-in-query', me) : null;
         }
       });
       start = paging.offset || 0;
