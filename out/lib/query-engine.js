@@ -498,7 +498,7 @@
       return arr;
     };
 
-    QueryCollection.prototype.query = function(paging) {
+    QueryCollection.prototype.query = function(paging, silent) {
       var collection, finish, me, models, start;
       me = this;
       models = [];
@@ -512,11 +512,17 @@
       collection.each(function(model) {
         var pass;
         pass = me.test(model);
-        if (pass) {
-          models.push(model);
-          return model.trigger('query-engine:in-query', me);
+        if(silent) {
+            if (pass) {
+              models.push(model);
+            }
         } else {
-          return model.trigger('query-engine:not-in-query', me);
+            if (pass) {
+              models.push(model);
+              return model.trigger('query-engine:in-query', me);
+            } else {
+              return model.trigger('query-engine:not-in-query', me);
+            }
         }
       });
       start = paging.offset || 0;
