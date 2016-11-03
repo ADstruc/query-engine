@@ -514,9 +514,9 @@
         pass = me.test(model);
         if (pass) {
           models.push(model);
-          return !silent ? model.trigger('query-engine:in-query', me) : null;
+          return !silent ? model.trigger('query-engine:in-query', me, model) : null;
         } else {
-          return !silent ? model.trigger('query-engine:not-in-query', me) : null;
+          return !silent ? model.trigger('query-engine:not-in-query', me, model) : null;
         }
       });
       start = paging.offset || 0;
