@@ -7,7 +7,7 @@
 
   _ = typeof module !== "undefined" && module !== null ? require('underscore') : this._;
 
-  Backbone = typeof module !== "undefined" && module !== null ? require('backbone') : this.Backbone;
+  Backbone = window.Backbone;
 
   util = {
     isEqual: function(value1, value2) {
@@ -432,7 +432,7 @@
       model || (model = {});
       if ((model.id != null) && this.get(model.id)) {
         exists = true;
-      } else if ((model.cid != null) && this.getByCid(model.cid)) {
+      } else if ((model.cid != null) && this.get(model.cid)) {
         exists = true;
       } else {
         exists = false;
